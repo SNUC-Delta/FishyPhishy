@@ -20,7 +20,7 @@ class Similarity():
 
     def __init__(self):
         file_dir = os.path.dirname(__file__)
-        print(file_dir)
+
         with open(os.path.join(file_dir, "model.pkl"), "rb") as f:
             self.model = pickle.load(f)
         with open(os.path.join(file_dir, "extractor.pkl"), "rb") as f:
