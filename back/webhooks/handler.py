@@ -16,12 +16,11 @@ class WebhookClient:
             raise ValueError(f"Invalid method {webhook['method']}")
 
 
-
 client = WebhookClient([
     {
-        "name": "webhook", # this will act like a uniique id to the webhook
+        "name": "webhook",  # this will act like a uniique id to the webhook
         "url": "https://joshuas-awesome-frontend/webhook/someendpoing",
-        "method": "POST", # or GET
+        "method": "POST",  # or GET
         "schema": {
             "url": "string",
             "originalurl": "string",
