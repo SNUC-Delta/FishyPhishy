@@ -4,7 +4,7 @@ from back.models.similarity.similarity import Similarity
 
 router = APIRouter()
 model = Similarity()
-
+print("Model loaded")
 
 @router.get("/image")
 async def image_compare(url1: str, url2):
