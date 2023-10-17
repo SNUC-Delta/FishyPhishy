@@ -39,5 +39,19 @@ async def levenshtein(test: str, reference: str):
     )
 
 
+@router.get("/all")
+async def test_all(test: str, reference: str):
+    return JSONResponse(
+        {
+            "status": "success",
+            "response": {
+                "regex": regex_class.check_url(test),
+                "jaro": jaro_class.jaro_winkler(test, reference),
+                "levenshtein": levenshtein_class.levenshtein_distance(test, reference)
+            }
+        }
+    )
+
+
 def setup(app):
     app.include_router(router, prefix="/checks")
