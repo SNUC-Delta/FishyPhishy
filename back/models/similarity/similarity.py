@@ -1,3 +1,5 @@
+import os
+
 import torch
 from PIL import Image
 import requests
@@ -17,11 +19,13 @@ class Similarity():
         return cls._instance
 
     def __init__(self):
-        with open("model.pkl", "rb") as f:
+        file_dir = os.path.dirname(__file__)
+        print(file_dir)
+        with open(os.path.join(file_dir, "model.pkl"), "rb") as f:
             self.model = pickle.load(f)
-        with open("extractor.pkl", "rb") as f:
+        with open(os.path.join(file_dir, "extractor.pkl"), "rb") as f:
             self.extractor = pickle.load(f)
-        with open("hidden_dim.pkl", "rb") as f:
+        with open(os.path.join(file_dir, "hidden_dim.pkl"), "rb") as f:
             self.hidden_dim = pickle.load(f)
 
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
