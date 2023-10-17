@@ -9,6 +9,13 @@ import pickle
 
 
 class Similarity():
+    _instance = None
+
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            cls._instance = super(Similarity, cls).__new__(cls, *args, **kwargs)
+        return cls._instance
+
     def __init__(self):
         with open("model.pkl", "rb") as f:
             self.model = pickle.load(f)
