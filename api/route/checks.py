@@ -5,6 +5,9 @@ from back.checks import jaro, levenshtein, regex
 router = APIRouter()
 
 regex_class = regex.RegexCheck()
+jaro_class = jaro.JaroWinkler()
+levenshtein_class = levenshtein.Levenshtein()
+
 
 @router.get("/regex")
 async def regex(url: str):
@@ -12,6 +15,26 @@ async def regex(url: str):
         {
             "status": "success",
             "response": regex_class.check_url(url)
+        }
+    )
+
+
+@router.get("/jaro")
+async def jaro(test: str, reference: str):
+    return JSONResponse(
+        {
+            "status": "success",
+            "response": jaro_class.jaro_winkler(test, reference)
+        }
+    )
+
+
+@router.get("/levenshtein")
+async def levenshtein(test: str, reference: str):
+    return JSONResponse(
+        {
+            "status": "success",
+            "response": levenshtein_class.levenshtein_distance(test, reference)
         }
     )
 
