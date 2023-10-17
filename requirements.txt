@@ -1,2 +1,8 @@
 uvicorn
 fastapi
+datasets
+transformers
+torch
+pillow
+scikit-learn
+torchvision
