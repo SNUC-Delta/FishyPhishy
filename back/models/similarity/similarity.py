@@ -20,6 +20,11 @@ class Similarity():
 
     def __init__(self):
         file_dir = os.path.dirname(__file__)
+        if not os.path.exists(os.path.join(file_dir, "model.pkl")):
+            print("Generating pickles...")
+            from back.models.similarity.generate_files import generate_pickles
+            generate_pickles()
+            print("Done!")
 
         with open(os.path.join(file_dir, "model.pkl"), "rb") as f:
             self.model = pickle.load(f)
