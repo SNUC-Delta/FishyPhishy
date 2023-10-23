@@ -38,6 +38,10 @@ async def levenshtein(test: str, reference: str):
         }
     )
 
+@router.get("/urlscan")
+async def urlscan(test: str):
+    pass
+    # todo: urlscan api
 
 @router.get("/all")
 async def test_all(test: str, reference: str):
