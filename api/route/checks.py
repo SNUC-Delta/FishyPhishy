@@ -1,6 +1,11 @@
+from urllib.parse import urlparse
+
 from fastapi import APIRouter
-from fastapi.responses import JSONResponse
+from back.assets.pretty_response import JSONResponse
 from back.checks import jaro, levenshtein, regex
+
+from back.assets import internet
+
 
 router = APIRouter()
 
@@ -38,10 +43,19 @@ async def levenshtein(test: str, reference: str):
         }
     )
 
+
 @router.get("/urlscan")
 async def urlscan(test: str):
-    pass
-    # todo: urlscan api
+    base_url = "https://urlscan.io/api/v1/search/?q=domain:{}&size=1"
+    domain = urlparse(test).netloc
+    url = base_url.format(domain)
+    response = await internet.get_json(url)
+    return JSONResponse(
+        {
+            "status": "success",
+            "response": response
+        }
+    )
 
 @router.get("/all")
 async def test_all(test: str, reference: str):

@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from fastapi.responses import JSONResponse
+from back.assets.pretty_response import JSONResponse
 from back.models.similarity.similarity import Similarity
 
 router = APIRouter()
