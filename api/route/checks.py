@@ -153,7 +153,7 @@ async def get_domain_info(domain_name: str):
         'Authorization': f'Bearer {auth_token}'
     }
 
-    response = internet.get_json(url, headers=headers)
+    response = await internet.get_json(url, headers=headers)
     return JSONResponse(response)
 
 
