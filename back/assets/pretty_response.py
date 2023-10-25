@@ -16,3 +16,6 @@ class JSONResponse(UglyJSONResponse):
             indent=2,
             separators=(",", ":"),
         ).encode("utf-8")
+
+    def json(self, content: str):
+        return json.loads(content)
