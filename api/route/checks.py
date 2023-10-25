@@ -1,4 +1,5 @@
 import asyncio
+import os
 from urllib.parse import urlparse
 
 from fastapi import APIRouter
@@ -8,7 +9,6 @@ from back.checks import jaro, levenshtein, regex
 from back.assets import internet
 from api.route import compare
 
-from dotenv import load_dotenv
 import os
 
 auth_token = os.getenv("AUTH_TOKEN")
@@ -122,6 +122,29 @@ async def is_blacklisted_endpoint(test: str):
     )
 
 
+async def phisherman_data(test_url: str):
+    base_url = "https://api.phisherman.gg/v1/domains/info/{}"
+    domain = urlparse(test_url).netloc
+    print(domain)
+    base_url = base_url.format(domain)
+    print(os.environ.get("phisherman"))
+    response = await internet.get_json(base_url,
+                                       headers={"Authorization": "Bearer {}".format(os.environ.get("phisherman"))})
+
+    return response
+
+
+@router.get("/phisherman")
+async def phisherman(test: str):
+    response = await phisherman_data(test)
+    return JSONResponse(
+        {
+            "status": "success",
+            "response": response
+        }
+    )
+
+
 @router.get("/all")
 async def test_all(test: str, reference: str):
     s1 = await screenshot(test)
@@ -136,6 +159,7 @@ async def test_all(test: str, reference: str):
                 "jaro": jaro_class.jaro_winkler(test, reference),
                 "levenshtein": levenshtein_class.levenshtein_distance(test, reference),
                 # "urlscan": await scan_url_json(test),
+                "phisherman": await phisherman_data(test),
                 "blacklisted": is_blacklisted(test),
                 "screenshot similarity": compare.get_similarity(
                     s1,
@@ -144,20 +168,6 @@ async def test_all(test: str, reference: str):
             }
         }
     )
-
-
-@router.get("/phisherman/{domain_name}")
-async def get_domain_info(domain_name: str):
-    url = f"https://api.phisherman.gg/v1/domains/info/{domain_name}"
-    headers = {
-        'Authorization': f'Bearer {auth_token}'
-    }
-
-    response = internet.get_json(url, headers=headers)
-    return JSONResponse(response)
-
-
-
 
 
 def setup(app):

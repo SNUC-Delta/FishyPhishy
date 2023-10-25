@@ -15,8 +15,8 @@ async def get_binary(url: str, **kwargs):
     return response
 
 
-async def get_json(url: str, **kwargs):
-    async with aiohttp.ClientSession() as session:
+async def get_json(url: str, headers: dict = None, **kwargs):
+    async with aiohttp.ClientSession(headers=headers) as session:
         async with session.get(url, **kwargs) as response:
             response = (await response.json())
     return response
