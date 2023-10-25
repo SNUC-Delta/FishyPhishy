@@ -7,7 +7,8 @@ import torchvision.transforms as transforms
 from sklearn.metrics.pairwise import cosine_similarity
 
 from io import BytesIO
-import pickle
+
+from transformers import AutoModel, ViTImageProcessor
 
 
 class Similarity():
@@ -19,20 +20,10 @@ class Similarity():
         return cls._instance
 
     def __init__(self):
-        file_dir = os.path.dirname(__file__)
-        if not os.path.exists(os.path.join(file_dir, "model.pkl")):
-            print("Generating pickles...")
-            from back.models.similarity.generate_files import generate_pickles
-            generate_pickles()
-            print("Done!")
-
-        with open(os.path.join(file_dir, "model.pkl"), "rb") as f:
-            self.model = pickle.load(f)
-        with open(os.path.join(file_dir, "extractor.pkl"), "rb") as f:
-            self.extractor = pickle.load(f)
-        with open(os.path.join(file_dir, "hidden_dim.pkl"), "rb") as f:
-            self.hidden_dim = pickle.load(f)
-
+        model_id = 'google/vit-base-patch16-224-in21k'
+        self.extractor = ViTImageProcessor.from_pretrained(model_id)
+        self.model = AutoModel.from_pretrained(model_id)
+        self.hidden_dim = self.model.config.hidden_size
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.model.to(self.device)
 
