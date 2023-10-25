@@ -70,10 +70,11 @@ async def scan_url_json(test: str):
         screenshot_url = None
     print(screenshot_url)
     return {
-            "status": "success",
-            "response": response,
-            "screenshot_url": screenshot_url
-        }
+        "status": "success",
+        "response": response,
+        "screenshot_url": screenshot_url
+    }
+
 
 @router.get("/urlscan")
 async def urlscan(test: str):
@@ -96,6 +97,25 @@ async def urlscan(test: str):
     )
 
 
+def is_blacklisted(test: str):
+    with open("back/assets/ALL-phishing-domains.txt", "r") as f:
+        black_domains = f.readlines()
+    if test in black_domains:
+        return True
+    return False
+
+
+@router.get("/blacklisted")
+async def is_blacklisted_endpoint(test: str):
+    return JSONResponse(
+        {
+            "status": "success",
+            "response": is_blacklisted(test)
+
+        }
+    )
+
+
 @router.get("/all")
 async def test_all(test: str, reference: str):
     s1 = await screenshot(test)
@@ -109,7 +129,8 @@ async def test_all(test: str, reference: str):
                 "regex": regex_class.check_url(test),
                 "jaro": jaro_class.jaro_winkler(test, reference),
                 "levenshtein": levenshtein_class.levenshtein_distance(test, reference),
-                "urlscan": await scan_url_json(test),
+                # "urlscan": await scan_url_json(test),
+                "blacklisted": is_blacklisted(test),
                 "screenshot similarity": compare.get_similarity(
                     s1,
                     s2

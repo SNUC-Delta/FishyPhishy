@@ -12,6 +12,7 @@ async def root():
 
 
 if __name__ == "__main__":
+    print("Starting server...")
     for file in os.listdir("api/route"):
         if file.endswith(".py"):
             importlib.import_module(f"api.route.{file[:-3]}").setup(app)
