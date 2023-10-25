@@ -8,6 +8,12 @@ from back.checks import jaro, levenshtein, regex
 from back.assets import internet
 from api.route import compare
 
+from dotenv import load_dotenv
+import os
+
+auth_token = os.getenv("AUTH_TOKEN")
+
+
 router = APIRouter()
 
 regex_class = regex.RegexCheck()
@@ -138,6 +144,20 @@ async def test_all(test: str, reference: str):
             }
         }
     )
+
+
+@router.get("/phisherman/{domain_name}")
+async def get_domain_info(domain_name: str):
+    url = f"https://api.phisherman.gg/v1/domains/info/{domain_name}"
+    headers = {
+        'Authorization': f'Bearer {auth_token}'
+    }
+
+    response = internet.get_json(url, headers=headers)
+    return JSONResponse(response)
+
+
+
 
 
 def setup(app):
