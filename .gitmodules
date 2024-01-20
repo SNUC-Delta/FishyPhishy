@@ -1,0 +1,3 @@
+[submodule "Frontend"]
+	path = frontend
+	url = https://github.com/BlitzJB/fishfinder

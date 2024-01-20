@@ -1,5 +1,3 @@
-import asyncio
-import os
 from urllib.parse import urlparse
 
 from fastapi import APIRouter
@@ -56,7 +54,6 @@ async def screenshot(url: str):
     domain = urlparse(url).netloc
     url = base_url.format(domain)
     response = await internet.get_json(url)
-    print(response)
     try:
         screenshot_url = response.get("results")[0].get("screenshot")
     except IndexError:
@@ -69,12 +66,10 @@ async def scan_url_json(test: str):
     domain = urlparse(test).netloc
     url = base_url.format(domain)
     response = await internet.get_json(url)
-    print(response)
     try:
         screenshot_url = response.get("results")[0].get("screenshot")
     except IndexError:
         screenshot_url = None
-    print(screenshot_url)
     return {
         "status": "success",
         "response": response,
@@ -88,12 +83,10 @@ async def urlscan(test: str):
     domain = urlparse(test).netloc
     url = base_url.format(domain)
     response = await internet.get_json(url)
-    print(response)
     try:
         screenshot_url = response.get("results")[0].get("screenshot")
     except IndexError:
         screenshot_url = None
-    print(screenshot_url)
     return JSONResponse(
         {
             "status": "success",
@@ -125,9 +118,7 @@ async def is_blacklisted_endpoint(test: str):
 async def phisherman_data(test_url: str):
     base_url = "https://api.phisherman.gg/v1/domains/info/{}"
     domain = urlparse(test_url).netloc
-    print(domain)
     base_url = base_url.format(domain)
-    print(os.environ.get("phisherman"))
     response = await internet.get_json(base_url,
                                        headers={"Authorization": "Bearer {}".format(os.environ.get("phisherman"))})
 
@@ -149,22 +140,32 @@ async def phisherman(test: str):
 async def test_all(test: str, reference: str):
     s1 = await screenshot(test)
     s2 = await screenshot(reference)
-    print(s1)
-    print(s2)
+    regex = regex_class.check_url(test)
+    jaro = jaro_class.jaro_winkler(test, reference)
+    levenshtein = levenshtein_class.levenshtein_distance(test, reference)
+    urlscan = await scan_url_json(test)
+    phisherman = await phisherman_data(test)
+    blacklisted = is_blacklisted(test)
+    screenshot_similarity = compare.get_similarity(
+        s1,
+        s2
+    ) if s1 and s2 else 0.0
+
     return JSONResponse(
         {
             "status": "success",
             "response": {
-                "regex": regex_class.check_url(test),
-                "jaro": jaro_class.jaro_winkler(test, reference),
-                "levenshtein": levenshtein_class.levenshtein_distance(test, reference),
-                # "urlscan": await scan_url_json(test),
-                "phisherman": await phisherman_data(test),
-                "blacklisted": is_blacklisted(test),
-                "screenshot similarity": compare.get_similarity(
-                    s1,
-                    s2
-                ) if s1 and s2 else 0.0
+                "test": test,
+                "reference": reference,
+                "regex": regex,
+                "jaro": round(jaro, 2),
+                "levenshtein_distance": levenshtein,
+                "levenshtein_percent": round(1 - (levenshtein / len(reference)), 2),
+                # "urlscan": urlscan,
+                "phisherman": phisherman[list(phisherman.keys())[0]].get("verifiedPhish", False),
+                "phishing_database": blacklisted,
+                "screenshot_similarity": screenshot_similarity,
+
             }
         }
     )
@@ -172,7 +173,3 @@ async def test_all(test: str, reference: str):
 
 def setup(app):
     app.include_router(router, prefix="/checks")
-
-
-if __name__ == "__main__":
-    asyncio.run(urlscan("https://www.google.com"))
